@@ -1,6 +1,8 @@
 #This script will pull daily data for a particular stock (in this case, Apple), then calculate and print dates on which local minimums and maximums occurred simultaneously across 3, 6, and 9 day periods.
 #This is a simplified script and does not take into account hours and months, as intraday and monthly data can be more challenging to work with and will require paid APIs for accurate data.
 
+#Be sure to install the necessary dependencies before running the script:  "pip install yfinance pandas numpy"
+
 import yfinance as yf
 import pandas as pd
 import numpy as np
