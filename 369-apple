@@ -1,0 +1,38 @@
+#This script will pull daily data for a particular stock (in this case, Apple), then calculate and print dates on which local minimums and maximums occurred simultaneously across 3, 6, and 9 day periods.
+#This is a simplified script and does not take into account hours and months, as intraday and monthly data can be more challenging to work with and will require paid APIs for accurate data.
+
+import yfinance as yf
+import pandas as pd
+import numpy as np
+
+# Download historical data
+data = yf.download('AAPL', start='2020-01-01', end='2023-01-01')
+
+# Define a function to identify local minimums and maximums
+def detect_peaks(df, periods):
+    for period in periods:
+        # Calculate rolling min and max
+        df[f'{period}_day_min'] = df['Low'].rolling(window=period).min()
+        df[f'{period}_day_max'] = df['High'].rolling(window=period).max()
+        
+        # Find where the current day's low is the same as the rolling min
+        df[f'{period}_day_min_is_low'] = np.where(df['Low'] == df[f'{period}_day_min'], 1, 0)
+
+        # Find where the current day's high is the same as the rolling max
+        df[f'{period}_day_max_is_high'] = np.where(df['High'] == df[f'{period}_day_max'], 1, 0)
+
+# Define the periods to examine
+periods = [3, 6, 9]
+
+# Find the peaks
+detect_peaks(data, periods)
+
+# Find where minima and maxima occur on the same day for all periods
+data['all_minima'] = data[[f'{period}_day_min_is_low' for period in periods]].sum(axis=1)
+data['all_maxima'] = data[[f'{period}_day_max_is_high' for period in periods]].sum(axis=1)
+
+# Print dates where minima and maxima occur on the same day for all periods
+print("Minima Dates:")
+print(data[data['all_minima'] == len(periods)].index)
+print("\nMaxima Dates:")
+print(data[data['all_maxima'] == len(periods)].index)
